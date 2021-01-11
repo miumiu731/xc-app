@@ -21,7 +21,7 @@
       </uni-collapse>
     </view>
    <view>
-     <uni-load-more  class="uni-loadmore" v-if="showLoadMore">{{loadMoreText}}</uni-load-more>
+     <uni-load-more :status="status" :icon-size="16" :content-text="contentText" />
    </view>
   </view>
  
@@ -31,7 +31,7 @@
 import api from "@/api/api.js";
 import uniCollapse from "@dcloudio/uni-ui/lib/uni-collapse/uni-collapse";
 import uniCollapseItem from "@dcloudio/uni-ui/lib/uni-collapse-item/uni-collapse-item";
-import uniLoadMore from "@dcloudio/uni-ui/lib/uni-load-more/uni-load-more";
+import uniLoadMore from "components/uni-load-more/uni-load-more";
 import uniTitle from "@dcloudio/uni-ui/lib/uni-title/uni-title.vue";
 export default {
   components: {
@@ -55,12 +55,18 @@ export default {
         title: "",
       },
       showLoadMore: true,
-      loadMoreText: "加载中...",
+      contentText: {
+      	contentdown: '上拉加载更多',
+      	contentrefresh: '加载中',
+      	contentnomore: '没有更多'
+      },
+	  reload: false,
+	  last_id: "",
+	  status: 'more',
       modalName: null,
       newCurrent: 1,
       newPagesSize: 10,
       length: 0,
-	  total: 0,
       url: "/generic/historys",
     };
   },
@@ -70,30 +76,30 @@ export default {
 	                      }, 1000);
    
   },
-  // 监听页面卸载
-  // onUnload() {
-	 //  debugger
-  //   (this.newCurrent = 0),
-  //     (this.historys = []),
-	 //  (this.showLoadMore = false);
-	 //  this.loadMoreText = "加载更多";
-  // },
+ // 监听页面卸载
+  onUnload() {
+	  debugger
+    (this.newCurrent = 0),
+      (this.historys = []),
+	  (this.showLoadMore = false);
+	  this.loadMoreText = "加载更多";
+  },
   // 上拉加载
   onReachBottom() {
 	  debugger
-    console.log("onReachBottom");
-    this.showLoadMore = true;
-    this.newCurrent += 1;
-    if (this.newCurrent  > this.length) {
-      this.loadMoreText = "没有更多数据了!";
-      this.newCurrent = 0;
-      return;
-    }
-   this.setListData(this.newCurrent, this.newPagesSize); 
-  },
+	      this.newCurrent += 1;
+		  if(this.newCurrent>this.length){
+			   this.status = 'noMore';
+		  }else{
+			  this.status = 'more';
+			  this.setListData(this.newCurrent, this.newPagesSize);
+		  }
+	  },
   // 下拉刷新
   onPullDownRefresh() {
-    this.initData(1, 10);
+	this.reload = true;
+	this.last_id = '';
+    this.setListData(1,10);
   },
   methods: {
     imgPath: function (path) {
@@ -114,8 +120,8 @@ export default {
             if (res.data.success) {
 			  let result = 	res.data.result;
               that.historys = result.records;
-              that.total = result.total;
-			  that.length = result.pages;
+			  that.length =  result.pages;
+			 that.last_id =  that.historys[result.pages - 1].id;
             }
           })
           .catch((e) => {
@@ -125,16 +131,21 @@ export default {
     },
     setListData(nowCurrent, nowSize) {
 		let that = this;
+	  if (this.last_id) {
+	  	//说明已有数据，目前处于上拉加载
+	  	this.status = 'loading';
+	  	this.nowSize = 10;
+	  }
       this.$http
         .get("/generic/historys?pageNo=" + nowCurrent + "&pageSize=" + nowSize)
         .then((res) => {
           console.log("data", res);
-
           if (res.data.success) {
 			let result = res.data.result;
-            that.historys = result.records;
-            that.total = result.total;
-			that.length = result.pages;
+			that.historys = that.reload ? result.records : this.historys.concat(result.records);
+			that.length =  result.pages;
+			that.last_id = that.historys[result.pages - 1].id;
+			that.reload = false;
           }
         })
         .catch((e) => {
