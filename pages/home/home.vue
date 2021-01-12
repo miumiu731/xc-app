@@ -106,7 +106,7 @@
 			    this.initWebSocket();
 			    this.loadCount(0);
 			},
-			goPage(page){
+			goPage(page){                                                                                                                                                                                                                                                      
 				if(!page){
 									return false;
 								}
@@ -115,7 +115,7 @@
 								}
 								if(page==='history'){
 								  uni.navigateTo({
-									url: "/pages/history/"+history
+									url: "/pages/history/"+page
 								})
 								}
 							uni.navigateTo({

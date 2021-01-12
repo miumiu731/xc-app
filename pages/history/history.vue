@@ -13,15 +13,20 @@
 					<video :src="item.url" autoplay loop muted :show-play-btn="false" :controls="false" objectFit="cover" v-if="item.type=='video'"></video>
 				</swiper-item>
 			</swiper>
-      <uni-collapse class="cu-list menu" v-for="(item, index) in historys" :key="index" accordion="true">
-        <uni-collapse-item :title="item.no+':'+item.title" :index="item.index ">
-          <image v-if="item.pic" :src="imgPath(item.pic)" mode="aspectFit"></image>
-          <view style="padding: 30rpx; text-indent:20px; letter-spacing:1px;">{{item.content}}</view>
-        </uni-collapse-item>
+
+      <uni-collapse class="cu-list menu" v-for="(item, index) in (historys || [])" :key="index" accordion="true">
+			<uni-collapse-item :title="item.no+':'+item.title" :index="item.index ">
+			 <image v-if="item.pic" :src="imgPath(item.pic)" mode="aspectFit"></image>
+			  <view style="padding: 30rpx; text-indent:20px; letter-spacing:1px;">{{item.content||''}}</view>
+			</uni-collapse-item>
       </uni-collapse>
+
     </view>
+   <view  class="text-bottom">
+     <uni-load-more :bottom="0" :status="status" :icon-size="16" :content-text="contentText" />
+   </view>
    <view>
-     <uni-load-more :status="status" :icon-size="16" :content-text="contentText" />
+   <y-fab :bottom="140" :right="40" :btnList="fabList" @click="handleFab" />
    </view>
   </view>
  
@@ -32,17 +37,16 @@ import api from "@/api/api.js";
 import uniCollapse from "@dcloudio/uni-ui/lib/uni-collapse/uni-collapse";
 import uniCollapseItem from "@dcloudio/uni-ui/lib/uni-collapse-item/uni-collapse-item";
 import uniLoadMore from "components/uni-load-more/uni-load-more";
+import yFab from "components/y-Fab/y-Fab.vue"; 
 import uniTitle from "@dcloudio/uni-ui/lib/uni-title/uni-title.vue";
 export default {
   components: {
     uniCollapse,
     uniCollapseItem,
-    uniLoadMore
+    uniLoadMore,
+	yFab
   },
-  // props: {
-  //   loadding: false,
-  //   pullUpOn: false,
-  // },
+
   data() {
     return {
 	   swiperList: [
@@ -60,6 +64,21 @@ export default {
       	contentrefresh: '加载中',
       	contentnomore: '没有更多'
       },
+	  //fab的设置
+	  fabList: [
+	  	{
+	  		bgColor: '#16C2C2',
+	  		text: '发布',
+	  		fontSize: 28,
+	  		color: '#fff'
+	  	},
+	  	{
+	  		bgColor: '#37b59d',
+	  		text: '分享',
+	  		fontSize: 28,
+	  		color: '#fff'
+	  	}
+	  ],
 	  reload: false,
 	  last_id: "",
 	  status: 'more',
@@ -71,22 +90,19 @@ export default {
     };
   },
   onLoad() {
-	    setTimeout(() => {
-	                         this.initData(1, 10);
-	                      }, 1000);
-   
+	  this.historys = []
+      this.initData(1, 10);
+	               
   },
  // 监听页面卸载
-  onUnload() {
-	  debugger
-    (this.newCurrent = 0),
-      (this.historys = []),
-	  (this.showLoadMore = false);
-	  this.loadMoreText = "加载更多";
-  },
+  // onUnload() {
+  //   (this.newCurrent = 0),
+  //     (this.historys = []),
+	 //  (this.showLoadMore = false);
+	 //  this.loadMoreText = "加载更多";
+  // },
   // 上拉加载
   onReachBottom() {
-	  debugger
 	      this.newCurrent += 1;
 		  if(this.newCurrent>this.length){
 			   this.status = 'noMore';
@@ -110,7 +126,6 @@ export default {
     },
     initData(nowCurrent, nowSize) {
 		let that = this
-      setTimeout(() => {
         this.$http
           .get(
             "/generic/historys?pageNo=" + nowCurrent + "&pageSize=" + nowSize
@@ -127,7 +142,6 @@ export default {
           .catch((e) => {
             console.log("请求错误", e);
           });
-      }, 3000);
     },
     setListData(nowCurrent, nowSize) {
 		let that = this;
@@ -152,6 +166,20 @@ export default {
           console.log("请求错误", e);
         });
     },
+	//点击右下角tab按钮
+	handleFab(e) {
+		let index = e.index;
+		switch (index) {
+			case 0:
+				uni.navigateTo({
+					url: '../push/push'
+				});
+				break;
+			case 1:
+				console.log(1);
+				break;
+		}
+	}
   },
 };
 </script>
@@ -181,6 +209,10 @@ export default {
 .switch-music::before {
   content: "\e6db";
 }
-
+.text-bottom {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+	}
 
 </style>
