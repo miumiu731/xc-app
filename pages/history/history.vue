@@ -144,20 +144,15 @@ export default {
 			that.last_id = that.historys[result.pages - 1].id;
 			let objArr=[];
 			for(let i=0; i<that.historys.length;i++){
-				let index = 0;
 				if(that.historys[i].pic){
 					let obj ={}
 					obj.url = that.historys[i].pic
 					obj.id = that.historys[i].id
 					obj.title = that.historys[i].title
-					obj.type ='image'
-					index++;
-					
+					obj.type ='image'					
 					objArr.push(obj)
 				}
-				if(index==6){
-					return 
-				}
+			
 			}
 			that.swiperList = objArr;
 			that.reload = false;
@@ -200,8 +195,7 @@ export default {
 	  z-index: 2;
 }
 .page_list{
-	padding-top: 410rpx; 
-	margin-bottom: 10rpx;
+	padding-top: 370rpx; 
 }
 .page.show {
   overflow: hidden;
