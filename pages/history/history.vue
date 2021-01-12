@@ -190,7 +190,7 @@ export default {
 	  z-index: 2;
 }
 .page_list{
-	padding-top: 400rpx; 
+	padding-top: 410rpx; 
 	margin-bottom: 10rpx;
 }
 .page.show {
