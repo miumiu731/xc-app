@@ -6,11 +6,11 @@
         <block slot="content">历史上的今天</block>
       </cu-custom>
 	  <!-- 轮播 -->
-	  <view class="page_header">
+	  <view  class="page_header">
 			<swiper class="screen-swiper square-dot"  :indicator-dots="true" :circular="true"
 			 :autoplay="true" interval="5000" duration="500" :style="[{animation: 'show 0.2s 1'}]">
 				<swiper-item v-for="(item,index) in swiperList" :key="index">
-					<image :src="item.url" mode="aspectFill" v-if="item.type=='image'" ></image>
+					<image :src="item.url"  mode="scaleToFill" v-if="item.type=='image'"  ></image>
 					<video :src="item.url" autoplay loop muted :show-play-btn="false" :controls="false" objectFit="cover" v-if="item.type=='video'"></video>
 				</swiper-item>
 			</swiper>
@@ -51,15 +51,8 @@ export default {
 
   data() {
     return {
-	   swiperList: [
-			{id:1,type: 'image',url: '/static/banner/banner1.png', link: ''},
-			{id:2,type: 'image',url: '/static/banner/banner2.jpg', link: ''},
-			{id:3,type: 'image',url: '/static/banner/banner3.jpg', link: ''},
-			{id:4,type: 'image',url: '/static/banner/banner4.jpg', link: ''},
-		],
-      historys: {
-        title: "",
-      },
+	   swiperList: [],
+      historys: [],
       showLoadMore: true,
       contentText: {
       	contentdown: '上拉加载更多',
@@ -92,7 +85,6 @@ export default {
     };
   },
   onLoad() {
-	  this.historys = []
       this.listData(1, 10);
 	               
   },
@@ -150,6 +142,24 @@ export default {
 			that.historys = that.reload ? result.records : this.historys.concat(result.records);
 			that.length =  result.pages;
 			that.last_id = that.historys[result.pages - 1].id;
+			let objArr=[];
+			for(let i=0; i<that.historys.length;i++){
+				let index = 0;
+				if(that.historys[i].pic){
+					let obj ={}
+					obj.url = that.historys[i].pic
+					obj.id = that.historys[i].id
+					obj.title = that.historys[i].title
+					obj.type ='image'
+					index++;
+					
+					objArr.push(obj)
+				}
+				if(index==6){
+					return 
+				}
+			}
+			that.swiperList = objArr;
 			that.reload = false;
           }
         })
