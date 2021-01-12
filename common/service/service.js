@@ -39,7 +39,7 @@ http.validateStatus = (statusCode) => {
 }
 
 http.interceptor.request((config, cancel) => { /* 请求之前拦截器 */
-  tip.alert(config.baseUrl)
+  //tip.alert(config.baseUrl)
   config.header = {
     ...config.header,
      'X-Access-Token':getTokenStorage()
