@@ -14,14 +14,15 @@
 					<video :src="item.url" autoplay loop muted :show-play-btn="false" :controls="false" objectFit="cover" v-if="item.type=='video'"></video>
 				</swiper-item>
 			</swiper>
-</view>
-      <uni-collapse class="cu-list menu" v-for="(item, index) in (historys || [])" :key="index" accordion="true">
+      </view>
+	  <view class="page_list">
+      <uni-collapse  class="cu-list menu" v-for="(item, index) in (historys || [])" :key="index" accordion="true">
 			<uni-collapse-item :title="item.no+':'+item.title" :index="item.index ">
 			 <image v-if="item.pic" :src="imgPath(item.pic)" mode="aspectFit"></image>
 			  <view style="padding: 30rpx; text-indent:20px; letter-spacing:1px;">{{item.content||''}}</view>
 			</uni-collapse-item>
       </uni-collapse>
-
+</view>
     </view>
    <view  class="text-bottom">
      <uni-load-more :bottom="0" :status="status" :icon-size="16" :content-text="contentText" />
@@ -95,6 +96,12 @@ export default {
       this.listData(1, 10);
 	               
   },
+  mounted () {
+      window.addEventListener('scroll', this.handleScroll)
+  },
+  onHide() {
+      window.removeEventListener("scroll", this.handleScroll);
+  },
   // 上拉加载
   onReachBottom() {
 	      this.newCurrent += 1;
@@ -112,6 +119,15 @@ export default {
     this.setListData(1,10);
   },
   methods: {
+	  handleScroll () {
+	          let scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop
+	          let offsetTop = document.querySelector('.dynamic-fixed-item').offsetTop
+	          if (scrollTop > offsetTop) {
+	          this.isFixed = true
+	          } else {
+	          this.isFixed = false
+	          }
+	    },
     imgPath: function (path) {
       if (path && path.indexOf("http") >= 0) {
         return path;
@@ -165,10 +181,17 @@ export default {
   width: 100vw;
 }
 .page_header {
-	position: -webkit-sticky;
-		  position: sticky;
-		  top: var(--window-top);
-		  z-index: 99;
+	position: fixed;
+	  top: 0;
+	  left: 0;
+	  width: 100%;
+	  background-color: #fff;
+	  padding-top: 60rpx;
+	  z-index: 2;
+}
+.page_list{
+	padding-top: 400rpx; 
+	margin-bottom: 10rpx;
 }
 .page.show {
   overflow: hidden;
