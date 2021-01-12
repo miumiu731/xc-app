@@ -6,6 +6,7 @@
         <block slot="content">历史上的今天</block>
       </cu-custom>
 	  <!-- 轮播 -->
+	  <view class="page_header">
 			<swiper class="screen-swiper square-dot"  :indicator-dots="true" :circular="true"
 			 :autoplay="true" interval="5000" duration="500" :style="[{animation: 'show 0.2s 1'}]">
 				<swiper-item v-for="(item,index) in swiperList" :key="index">
@@ -13,7 +14,7 @@
 					<video :src="item.url" autoplay loop muted :show-play-btn="false" :controls="false" objectFit="cover" v-if="item.type=='video'"></video>
 				</swiper-item>
 			</swiper>
-
+</view>
       <uni-collapse class="cu-list menu" v-for="(item, index) in (historys || [])" :key="index" accordion="true">
 			<uni-collapse-item :title="item.no+':'+item.title" :index="item.index ">
 			 <image v-if="item.pic" :src="imgPath(item.pic)" mode="aspectFit"></image>
@@ -33,7 +34,7 @@
 </template>
 
 <script>
-import api from "@/api/api.js";
+import apiHistoryService from "@/api/historyApi.js";
 import uniCollapse from "@dcloudio/uni-ui/lib/uni-collapse/uni-collapse";
 import uniCollapseItem from "@dcloudio/uni-ui/lib/uni-collapse-item/uni-collapse-item";
 import uniLoadMore from "components/uni-load-more/uni-load-more";
@@ -91,16 +92,9 @@ export default {
   },
   onLoad() {
 	  this.historys = []
-      this.initData(1, 10);
+      this.listData(1, 10);
 	               
   },
- // 监听页面卸载
-  // onUnload() {
-  //   (this.newCurrent = 0),
-  //     (this.historys = []),
-	 //  (this.showLoadMore = false);
-	 //  this.loadMoreText = "加载更多";
-  // },
   // 上拉加载
   onReachBottom() {
 	      this.newCurrent += 1;
@@ -108,7 +102,7 @@ export default {
 			   this.status = 'noMore';
 		  }else{
 			  this.status = 'more';
-			  this.setListData(this.newCurrent, this.newPagesSize);
+			  this.listData(this.newCurrent, this.newPagesSize);
 		  }
 	  },
   // 下拉刷新
@@ -124,34 +118,15 @@ export default {
       }
       return this.siteHost + path;
     },
-    initData(nowCurrent, nowSize) {
-		let that = this
-        this.$http
-          .get(
-            "/generic/historys?pageNo=" + nowCurrent + "&pageSize=" + nowSize
-          )
-          .then((res) => {
-            console.log("data", res);
-            if (res.data.success) {
-			  let result = 	res.data.result;
-              that.historys = result.records;
-			  that.length =  result.pages;
-			 that.last_id =  that.historys[result.pages - 1].id;
-            }
-          })
-          .catch((e) => {
-            console.log("请求错误", e);
-          });
-    },
-    setListData(nowCurrent, nowSize) {
+    
+    listData(nowCurrent, nowSize) {
 		let that = this;
 	  if (this.last_id) {
 	  	//说明已有数据，目前处于上拉加载
 	  	this.status = 'loading';
 	  	this.nowSize = 10;
 	  }
-      this.$http
-        .get("/generic/historys?pageNo=" + nowCurrent + "&pageSize=" + nowSize)
+     apiHistoryService.getHistoryList(nowCurrent, nowSize)
         .then((res) => {
           console.log("data", res);
           if (res.data.success) {
@@ -189,7 +164,12 @@ export default {
   height: 100vh;
   width: 100vw;
 }
-
+.page_header {
+	position: -webkit-sticky;
+		  position: sticky;
+		  top: var(--window-top);
+		  z-index: 99;
+}
 .page.show {
   overflow: hidden;
 }
@@ -210,9 +190,10 @@ export default {
   content: "\e6db";
 }
 .text-bottom {
-		display: flex;
-		flex-direction: row;
-		justify-content: space-between;
+		position: fixed;  
+		bottom: 0rpx;
+		left: 0rpx;
+		right: 0rpx;
 	}
 
 </style>
